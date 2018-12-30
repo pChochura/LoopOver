@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0.3"
+        android:src="@mipmap/background"
+        android:scaleType="centerCrop"/>
+
+    <android.support.v7.widget.CardView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="50dp"
+        app:layout_constraintWidth_percent="0.5"
+        app:layout_constraintDimensionRatio="3:1"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:cardBackgroundColor="@color/colorPrimary"
+        app:cardCornerRadius="15dp"
+        app:cardElevation="2dp">
+
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/moves"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/moves"
+            android:textColor="@color/colorAccent"
+            android:textSize="25sp"
+            android:gravity="center"/>
+
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintWidth_percent="1"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:cardBackgroundColor="@color/colorAccent"
+        app:cardElevation="5dp"
+        app:cardCornerRadius="0dp"
+        app:cardUseCompatPadding="false">
+
+        <FrameLayout
+            android:id="@+id/map"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="50dp"
+        app:layout_constraintWidth_percent="0.4"
+        app:layout_constraintDimensionRatio="3:1"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:cardBackgroundColor="@color/colorAccent"
+        app:cardCornerRadius="15dp"
+        app:cardElevation="2dp">
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/undoButton"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/divider"
+                android:background="?android:attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:onClick="clickUndo"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:src="@drawable/ic_undo"
+                android:scaleType="center"
+                android:tint="@color/colorPrimary"/>
+
+            <View
+                android:id="@+id/divider"
+                android:layout_width="1dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/undoButton"
+                app:layout_constraintEnd_toStartOf="@id/resetButton"
+                android:background="@color/colorPrimary"/>
+
+            <ImageView
+                android:id="@+id/resetButton"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                app:layout_constraintStart_toEndOf="@id/divider"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:background="?android:attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:onClick="clickReset"
+                android:src="@drawable/ic_reset"
+                android:scaleType="center"
+                android:tint="@color/colorPrimary"/>
+
+        </android.support.constraint.ConstraintLayout>
+
+    </android.support.v7.widget.CardView>
+
+</android.support.constraint.ConstraintLayout>
