@@ -24,7 +24,7 @@ import java.util.Random;
 @SuppressLint("ClickableViewAccessibility")
 public class StartActivity extends Activity implements View.OnTouchListener {
 
-	private enum Direction {vertical, horizontal;}
+	public enum Direction {vertical, horizontal}
 
 	private int duration = 200;
 	private boolean instantRandom;
@@ -36,6 +36,7 @@ public class StartActivity extends Activity implements View.OnTouchListener {
 	private AnimatorSet set = new AnimatorSet();
 	private ViewGroup mapLayout;
 	private Direction prevDir, dir;
+	private ArrayList<MoveHistory> movesHistory;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +58,8 @@ public class StartActivity extends Activity implements View.OnTouchListener {
 
 		findViewById(R.id.undoButton).setAlpha(0.3f);
 		findViewById(R.id.resetButton).setAlpha(0.3f);
+
+		movesHistory = new ArrayList<>();
 
 		generateMap();
 		randomMap();
@@ -194,13 +197,11 @@ public class StartActivity extends Activity implements View.OnTouchListener {
 	private void winAnimation() {
 		findViewById(R.id.undoButton).animate().alpha(0.3f).setDuration(duration).start();
 
-		winMessage.setAlpha(1);
-
 		ArrayList<Animator> items = new ArrayList<>();
 		for(int i = 0; i < MAP_SIZE - 1; i++) for(int j = 0; j < MAP_SIZE - 1; j++) {
-			ObjectAnimator a1 = ObjectAnimator.ofFloat(tiles[j][i], "rotation", tiles[j][i].getRotation(), new Random().nextFloat() * 180 - 90);
-			ObjectAnimator a2 = ObjectAnimator.ofFloat(tiles[j][i], "y", tiles[j][i].getY(), tiles[MAP_SIZE - 1][MAP_SIZE - 1].getY());
-			ObjectAnimator a3 = ObjectAnimator.ofFloat(tiles[j][i], "x", tiles[j][i].getX(), tiles[j][i].getX() + (new Random().nextFloat() - 0.5f) * TILE_SIZE * 0.5f);
+			ObjectAnimator a1 = ObjectAnimator.ofFloat(tiles[j][i], "rotation", new Random().nextFloat() * 180 - 90);
+			ObjectAnimator a2 = ObjectAnimator.ofFloat(tiles[j][i], "y", tiles[MAP_SIZE - 1][MAP_SIZE - 1].getY());
+			ObjectAnimator a3 = ObjectAnimator.ofFloat(tiles[j][i], "x", tiles[j][i].getX() + (new Random().nextFloat() - 0.5f) * TILE_SIZE * 0.5f);
 			a1.setStartDelay(new Random().nextInt(duration * 3));
 			a2.setStartDelay(new Random().nextInt(duration * 3));
 			a3.setStartDelay(new Random().nextInt(duration * 3));
@@ -209,11 +210,13 @@ public class StartActivity extends Activity implements View.OnTouchListener {
 			items.add(a3);
 		}
 		ObjectAnimator a1 = ObjectAnimator.ofFloat(winMessage, "y", -(MAP_SIZE - 1) * TILE_SIZE, 0);
-		ObjectAnimator a2 = ObjectAnimator.ofFloat(winMessage, "rotation", winMessage.getRotation(), 0);
+		ObjectAnimator a2 = ObjectAnimator.ofFloat(winMessage, "rotation", new Random().nextInt(180) - 90, 0);
+		ObjectAnimator a3 = ObjectAnimator.ofFloat(winMessage, "alpha", 1);
 		a1.setStartDelay(duration * 5);
 		a2.setStartDelay(duration * 5);
 		items.add(a1);
 		items.add(a2);
+		items.add(a3);
 		AnimatorSet set = new AnimatorSet();
 		set.playTogether(items);
 		set.setDuration(duration * 10);
@@ -234,28 +237,27 @@ public class StartActivity extends Activity implements View.OnTouchListener {
 			moves = 0;
 			showMovesCounter();
 			randomMap();
+			movesHistory = new ArrayList<>();
 		}
 	}
 
 	public void clickUndo(View view) {
-		if(moves > 0 && findViewById(R.id.undoButton).getAlpha() == 1) {
+		if(moves > 0 && findViewById(R.id.undoButton).getAlpha() == 1 && !movesHistory.isEmpty()) {
 			moves--;
 			showMovesCounter();
-			findViewById(R.id.undoButton).animate().alpha(0.3f).setDuration(duration).start();
+			if(movesHistory.size() == 1)
+				findViewById(R.id.undoButton).animate().alpha(0.3f).setDuration(duration).start();
 
-			if(prevDir == Direction.horizontal) {
-				int y = 0, offset = 1;
-				for(int i = 0; i < MAP_SIZE - 1; i++) if(prevValues[0][i] != Integer.parseInt(tiles[0][i].getText().toString())) y = i;
-				for(int i = 0; i < MAP_SIZE - 1; i++) if(prevValues[0][y] == Integer.parseInt(tiles[i][y].getText().toString())) offset = i;
+            MoveHistory m = movesHistory.get(movesHistory.size() - 1);
+            int pos = m.getPos(), offset = m.getOffset();
+            if(m.getDirection() == Direction.horizontal) {
 				boolean b = offset > (MAP_SIZE - 1) / 2;
-				makeMove(0, b ? MAP_SIZE - 1 - offset : offset, b ? 1 : 0, -1, y, null);
-			} else if(prevDir == Direction.vertical) {
-				int x = 0, offset = 1;
-				for(int i = 0; i < MAP_SIZE - 1; i++) if(prevValues[i][0] != Integer.parseInt(tiles[i][0].getText().toString())) x = i;
-				for(int i = 0; i < MAP_SIZE - 1; i++) if(prevValues[x][0] == Integer.parseInt(tiles[x][i].getText().toString())) offset = i;
+				makeMove(0, b ? MAP_SIZE - 1 - offset : offset, b ? 1 : 0, -1, pos, null);
+			} else {
 				boolean b = offset > (MAP_SIZE - 1) / 2;
-				makeMove(0, b ? MAP_SIZE - 1 - offset : offset, b ? 3 : 2, -1, x, null);
+				makeMove(0, b ? MAP_SIZE - 1 - offset : offset, b ? 3 : 2, -1, pos, null);
 			}
+			movesHistory.remove(m);
 		}
 	}
 
@@ -342,15 +344,26 @@ public class StartActivity extends Activity implements View.OnTouchListener {
 										tiles[j][i].setY(i * TILE_SIZE);
 									}
 							set = new AnimatorSet();
-							boolean moved = true, won = true;
+							boolean moved = false, won = true;
 							for(int i = 0; i < MAP_SIZE - 1; i++) for(int j = 0; j < MAP_SIZE - 1; j++) {
 								int value = Integer.parseInt(tiles[j][i].getText().toString());
-								if(prevValues[j][i] != value) moved = false;
+								if(prevValues[j][i] != value) moved = true;
 								if(value != i * (MAP_SIZE - 1) + j + 1) won = false;
 							}
 							if(won) {
 								winAnimation();
-							} else if(!moved) {
+							} else if(moved) {
+							    int offset = 0, position;
+							    if(prevDir == Direction.horizontal) {
+                                    position = y;
+                                    for(int i = 0; i < MAP_SIZE - 1; i++) if(prevValues[0][y] == Integer.parseInt(tiles[i][y].getText().toString())) offset = i;
+                                } else {
+                                    position = x;
+                                    for(int i = 0; i < MAP_SIZE - 1; i++) if(prevValues[x][0] == Integer.parseInt(tiles[x][i].getText().toString())) offset = i;
+                                }
+
+							    movesHistory.add(new MoveHistory(position, offset, prevDir));
+
 								moves++;
 								showMovesCounter();
 								findViewById(R.id.undoButton).animate().alpha(1).setDuration(duration).start();
