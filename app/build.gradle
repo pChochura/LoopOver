@@ -1,6 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'loopoverkey'
+            keyPassword '781468136'
+            storeFile file('E:/Moje/Keys/keystore.jks')
+            storePassword '781468136'
+        }
+    }
     compileSdkVersion 27
     defaultConfig {
         applicationId "com.infinitemind.loopover"
@@ -13,6 +21,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
         }
     }
     compileOptions {
