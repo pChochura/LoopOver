@@ -5,6 +5,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -195,6 +196,8 @@ public class StartActivity extends Activity implements View.OnTouchListener {
 	}
 
 	private void winAnimation() {
+		saveMinMoves();
+
 		findViewById(R.id.undoButton).animate().alpha(0.3f).setDuration(duration).start();
 
 		ArrayList<Animator> items = new ArrayList<>();
@@ -222,6 +225,12 @@ public class StartActivity extends Activity implements View.OnTouchListener {
 		set.setDuration(duration * 10);
 		set.setInterpolator(new AccelerateInterpolator(6f));
 		set.start();
+	}
+
+	private void saveMinMoves() {
+		SharedPreferences sP = getSharedPreferences(MainActivity.MIN_MOVES, MODE_PRIVATE);
+		int minMoves = sP.getInt(MainActivity.MIN_MOVES + "_" + (MAP_SIZE - 1), Integer.MAX_VALUE);
+		sP.edit().putInt(MainActivity.MIN_MOVES + "_" + (MAP_SIZE - 1), Math.min(minMoves, moves)).apply();
 	}
 
 	public void clickReset(View view) {
@@ -350,9 +359,7 @@ public class StartActivity extends Activity implements View.OnTouchListener {
 								if(prevValues[j][i] != value) moved = true;
 								if(value != i * (MAP_SIZE - 1) + j + 1) won = false;
 							}
-							if(won) {
-								winAnimation();
-							} else if(moved) {
+							if(moved) {
 							    int offset = 0, position;
 							    if(prevDir == Direction.horizontal) {
                                     position = y;
@@ -368,6 +375,7 @@ public class StartActivity extends Activity implements View.OnTouchListener {
 								showMovesCounter();
 								findViewById(R.id.undoButton).animate().alpha(1).setDuration(duration).start();
 							}
+							if(won) winAnimation();
 						}));
 						prevDir = dir;
 						dir = null;
