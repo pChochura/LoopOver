@@ -18,6 +18,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
+import android.view.animation.AnticipateOvershootInterpolator;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -168,7 +169,7 @@ public class StartActivity extends Activity implements View.OnTouchListener {
 		for(int i = 0; i < MAP_SIZE; i++) for(int j = 0; j < MAP_SIZE; j++) {
 			AppCompatTextView tile = new AppCompatTextView(getApplicationContext());
 			tile.setLayoutParams(new ViewGroup.LayoutParams(TILE_SIZE, TILE_SIZE));
-			tile.setTextSize(TypedValue.COMPLEX_UNIT_PX, TILE_SIZE / 5);
+			tile.setTextSize(TypedValue.COMPLEX_UNIT_PX, TILE_SIZE / 3f);
 			tile.setText(String.valueOf(i * (MAP_SIZE - 1) + j + 1));
 			tile.setTextColor(getResources().getColor(R.color.colorPrimary));
 			tile.setTypeface(ResourcesCompat.getFont(getApplicationContext(), R.font.arcon));
